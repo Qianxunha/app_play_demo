@@ -5,7 +5,7 @@ DecodeContext videoHwDevice = { NULL };
 static AVPixelFormat get_format(AVCodecContext *avctx, const enum AVPixelFormat *pix_fmts);
 
 
-// ffmpeg + dxva2 hw decode
+// ffmpeg + dxva2 hw decode xx
 static AVBufferRef *hw_device_ctx = NULL;
 static enum AVPixelFormat hw_pix_fmt;
 
