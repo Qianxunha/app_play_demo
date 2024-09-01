@@ -45,12 +45,14 @@ LIBS += -L$$PWD/lib/ffmpeg \
 SOURCES += \
     main.cpp \
     src/appconfig.cpp \
+    src/dialogNetStream.cpp \
     src/videoThread.cpp \
     src/videoWidget.cpp \
     widget.cpp
 
 HEADERS += \
     inc/appconfig.h \
+    inc/dialogNetStream.h \
     inc/videoThread.h \
     inc/videoWidget.h \
     widget.h
@@ -62,3 +64,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     videoImage.qrc
+
+FORMS += \
+    widgetUI/DialogNetStream.ui

@@ -26,6 +26,7 @@ VideoWidget::VideoWidget(int mwidth, int mheight, VideoThread *videoThread, QWid
     this->strImg_voice    = ":/new/prefix1/videoImage/voice";
     this->strImg_photo    = ":/new/prefix1/videoImage/videoPhoto";
     this->strImg_videoMax = ":/new/prefix1/videoImage/max1";
+    this->strImg_fullMax  = ":/new/prefix1/videoImage/max1";
 
     this->setGeometry(0, 0, mwidth, mheight);
     this->setMinimumSize(QSize(mwidth, mheight));
@@ -56,11 +57,20 @@ VideoWidget::VideoWidget(int mwidth, int mheight, VideoThread *videoThread, QWid
     closeBtn->setCursor(QCursor(Qt::PointingHandCursor));
     closeBtn->setToolTip("返回");
 
-    connect(minBtn,             &CustomPushButton::clicked,     this, &VideoWidget::on_minBtn_clicked);
-    connect(maxBtn,             &CustomPushButton::clicked,     this, &VideoWidget::on_maxBtn_clicked);
-    connect(closeBtn,           &CustomPushButton::clicked,     this, &VideoWidget::on_closeBtn_clicked);
+    netStreamBtn = new QPushButton;
+    netStreamBtn->setText("打开网络串流");
+    netStreamBtn->resize(150, 30);
+
+    pDialogNetStream = new DialogNetStream;
+
+    connect(minBtn,             &CustomPushButton::clicked,             this,   &VideoWidget::on_minBtn_clicked);
+    connect(maxBtn,             &CustomPushButton::clicked,             this,   &VideoWidget::on_maxBtn_clicked);
+    connect(closeBtn,           &CustomPushButton::clicked,             this,   &VideoWidget::on_closeBtn_clicked);
+    connect(netStreamBtn,       &QPushButton::clicked,                  this,   &VideoWidget::on_openNetStream_clicked);
+    connect(pDialogNetStream,   &DialogNetStream::emitPlayNetStream,    this,   &VideoWidget::on_playNetStream);
 
     titleLayout = new QHBoxLayout;
+    titleLayout->addWidget(netStreamBtn);
     titleLayout->addWidget(maxBtn);
     titleLayout->addWidget(closeBtn);
     titleLayout->setAlignment(Qt::AlignRight);
@@ -148,6 +158,11 @@ VideoWidget::VideoWidget(int mwidth, int mheight, VideoThread *videoThread, QWid
     videoMaxBtn->setIconSize(QSize(20, 20));
     videoMaxBtn->setCursor(QCursor(Qt::PointingHandCursor));
 
+    fullMaxBtn = new CustomPushButton(this->strImg_fullMax, true);
+    fullMaxBtn->setFixedSize(QSize(30, 30));
+    fullMaxBtn->setIconSize((QSize(20, 20)));
+    fullMaxBtn->setCursor(QCursor(Qt::PointingHandCursor));
+
     //播放倍速框
     speekQCombox = new QComboBox;
     speekQCombox->setFixedSize(QSize(55, 30));
@@ -165,6 +180,7 @@ VideoWidget::VideoWidget(int mwidth, int mheight, VideoThread *videoThread, QWid
     connect(voiceBtn,       &CustomPushButton::clicked, this, &VideoWidget::on_voiceBtn_clicked);
     connect(photoBtn,       &CustomPushButton::clicked, this, &VideoWidget::on_photoBtn_clicked);
     connect(videoMaxBtn,    &CustomPushButton::clicked, this, &VideoWidget::on_videoMaxBtn_clicked);
+    connect(fullMaxBtn,     &CustomPushButton::clicked, this, &VideoWidget::on_fullMaxBtn_clicked);
     connect(speekQCombox,  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,&VideoWidget::Dealmp4FilePlaySpeek);
 
     //控制窗口部件部件
@@ -187,6 +203,7 @@ VideoWidget::VideoWidget(int mwidth, int mheight, VideoThread *videoThread, QWid
     controlLayout->addSpacing(0);
     controlLayout->addWidget(videoMaxBtn);
     controlLayout->addSpacing(20);
+    controlLayout->addWidget(fullMaxBtn);
     controlLayout->setAlignment(Qt::AlignCenter);
 
     playControlLayout = new QVBoxLayout;
@@ -1089,7 +1106,6 @@ void VideoWidget::on_openFileBtn_clicked()
         item->setTextColor(QColor(255,255,255));
         item->setSizeHint(QSize(270, 45));
 
-
         QFont list_font;
         list_font.setFamily("Microsoft YaHei");
         list_font.setPointSize(10);
@@ -1396,7 +1412,7 @@ void VideoWidget::on_photoBtn_clicked()
 }
 
 /*
- * function: 视频最大化
+ * function: 视频播放列表侧边栏收起
  */
 void VideoWidget::on_videoMaxBtn_clicked()
 {
@@ -1408,9 +1424,8 @@ void VideoWidget::on_videoMaxBtn_clicked()
         openFileBtn->move((this->width()-80)/2 -85 ,this->height()/2-25);
 
         //显示文件名
-        if(openFileBtn->isHidden()){
+        if(openFileBtn->isHidden())
             labelVideoName->show();
-        }
     }
     else
     {
@@ -1422,6 +1437,30 @@ void VideoWidget::on_videoMaxBtn_clicked()
         labelVideoName->hide();
     }
 }
+
+/*
+ * 全屏
+ */
+void VideoWidget::on_fullMaxBtn_clicked()
+{
+    if(fullMaxBtn->isChecked())
+    {
+        rightBarWidget->hide();
+        titleWidget->hide();
+        openFileBtn->move((this->width()-80)/2 -85 ,this->height()/2-25);
+        if(openFileBtn->isHidden())
+            labelVideoName->show();
+    }
+    else
+    {
+        openFileBtn->move((this->width()-340)/2 -85 ,this->height()/2-25);
+        rightBarWidget->show();
+        titleWidget->show();
+        labelVideoName->hide();
+    }
+    emit emitFullScreen();
+}
+
 
 /*
  * function: 窗口最小化
@@ -1453,6 +1492,21 @@ void VideoWidget::on_closeBtn_clicked()
         emit emitOpenVideoSignals();
     this->hide();
 
+}
+
+void VideoWidget::on_openNetStream_clicked()
+{
+    pDialogNetStream->exec();
+}
+
+// 播放网络流
+void VideoWidget::on_playNetStream(QString netAddress)
+{
+    qDebug()<<"text="<<netAddress;
+    //
+    pVideoThread->mp4FileIsPlay = true;
+    labelVideoName->setText(netAddress);
+    emit pVideoThread->emitGetMp4FilePath(netAddress);
 }
 
 void VideoWidget::on_closeBtn1_clicked()

@@ -2,8 +2,8 @@
 #define  VIDEOWIDGET_H
 
 
-
 #include "videoThread.h"
+#include "dialogNetStream.h"
 
 #include <QLabel>
 #include <QMenu>
@@ -16,7 +16,6 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 
-
 #define ATTRIB_VERTEX  0     //openGL
 #define ATTRIB_TEXTURE 1
 
@@ -27,10 +26,12 @@ public:
 
     VideoThread *pVideoThread;
 
-    CustomPushButton*maxBtn;           // 最大化与最小化
+    CustomPushButton*maxBtn;            // 最大化与最小化
     CustomPushButton*minBtn;
-    CustomPushButton*closeBtn;         // 返回主窗口按钮
-    QPushButton     *closeBtn1;        // 返回主窗口按钮
+    CustomPushButton*closeBtn;          // 返回主窗口按钮
+    QPushButton     *closeBtn1;         // 返回主窗口按钮
+    QPushButton     *netStreamBtn;      // 网络流按钮
+    DialogNetStream *pDialogNetStream;  // 网络流窗口
 
     QBoxLayout      *playLayout;
     QBoxLayout      *titleLayout;
@@ -101,7 +102,8 @@ private:
     CustomPushButton *playBtn;          // 播放暂停
     CustomPushButton *voiceBtn;         // 音量
     CustomPushButton *photoBtn;         // 拍照
-    CustomPushButton *videoMaxBtn;      // 全屏
+    CustomPushButton *videoMaxBtn;      // 侧边栏
+    CustomPushButton *fullMaxBtn;       // 全屏
 
     QComboBox *speekQCombox;            // 播放倍速框
 
@@ -122,6 +124,7 @@ private:
     QString strImg_voice;
     QString strImg_photo;
     QString strImg_videoMax;
+    QString strImg_fullMax;
 
     int m_width;                        // 视频帧宽度
     int m_height;                       // 视频帧高度
@@ -213,6 +216,9 @@ signals:
      */
     void emitOpenglError(int errorIndx);
 
+    // full screen
+    void emitFullScreen();
+
     //mp4
     void emitGetMp4FilePath(QString mp4filePath);
     void emitYuv420pData(uint8_t *m_py, uint8_t*m_pu,uint8_t*m_pv, int width, int height, int hw_type);
@@ -245,11 +251,17 @@ public slots:
 
     void on_videoMaxBtn_clicked();
 
+    void on_fullMaxBtn_clicked();
+
     void on_minBtn_clicked();
 
     void on_maxBtn_clicked();
 
     void on_closeBtn_clicked();
+
+    void on_openNetStream_clicked();            // 打开网络串流窗口
+
+    void on_playNetStream(QString netAddress);  // 播放网络串流
 
     void on_closeBtn1_clicked();
 

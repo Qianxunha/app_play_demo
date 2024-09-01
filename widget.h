@@ -15,6 +15,9 @@ public:
 
     void resizeEvent(QResizeEvent *event);
 
+private slots:
+    void setFullScreen();
+
 private:
     VideoThread *pVideoThread;
     VideoWidget *pVideoWidget;

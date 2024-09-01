@@ -400,28 +400,30 @@ int VideoThread:: readMp4FileDecode (const char *mp4FilePath)
     //"rtsp://192.168.1.126/live/livestream"
     //"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8" HLS协议
     //"http://www.w3school.com.cn/i/movie.mp4" MP4文件公网
+    qDebug()<<"mp4file="<<mp4FilePath;
     if (avformat_open_input(&mp4FmtCtx, mp4FilePath, NULL, NULL) < 0)
     {
         emit emitMp4FileError(0);
         return -1;
     }
-
+    qDebug()<<"----------------------5";
     //获取mp4文件总秒数
     mp4FileIsPlay = true;
     emit emitOpenFileButton(0);
-    emit emitGetMp4FileTime(mp4FmtCtx->duration/1000000);
+    //emit emitGetMp4FileTime(mp4FmtCtx->duration/1000000);
     emit emitGetPlayStatus(1);
     emit emitGetStopStatus(1);
-
+    qDebug()<<"----------------------7";
     /* retrieve stream information */
     if (avformat_find_stream_info(mp4FmtCtx, NULL) < 0)
     {
         emit emitMp4FileError(2);
         return -1;
     }
-
+    qDebug()<<"----------------------5";
     if(open_codec_context(&videoIndex, &video_dec_ctx, mp4FmtCtx, AVMEDIA_TYPE_VIDEO) >= 0)
     {
+        qDebug()<<"----------------------4";
         video_stream = mp4FmtCtx->streams[videoIndex];
 
         /* allocate image where the decoded image will be put */
@@ -435,13 +437,12 @@ int VideoThread:: readMp4FileDecode (const char *mp4FilePath)
         int stride_y = align(mp4Width, align_width);
         int stride_uv= align(stride_y/2, align_width)*2;
 
-
         int size_y = align(mp4Height,   align_height);
         int size_uv= align(mp4Height/2, align_height);
 
         mp4Width = stride_y;
         mp4Height= size_y;
-
+        qDebug()<<"----------------------3";
         /* 图像帧率 */
         AVRational frame_rate = av_guess_frame_rate(mp4FmtCtx, video_stream, NULL);
         fps = frame_rate.num/frame_rate.den;
@@ -471,7 +472,7 @@ int VideoThread:: readMp4FileDecode (const char *mp4FilePath)
             goto finish;
         }
     }
-
+    qDebug()<<"----------------------1";
     audioframe = av_frame_alloc();
     videoframe = av_frame_alloc();
     swFrame    = av_frame_alloc();
@@ -480,18 +481,17 @@ int VideoThread:: readMp4FileDecode (const char *mp4FilePath)
     tmpframe = av_frame_alloc();
     tmpframe->width = mp4Width;
     tmpframe->height= mp4Height;
-
+    qDebug()<<"----------------------2";
     out_buffer = (uint8_t *)av_malloc(avpicture_get_size(yuv_pixfmt, mp4Width, mp4Height));
     avpicture_fill((AVPicture *)tmpframe, out_buffer, yuv_pixfmt, tmpframe->width, tmpframe->height);
     swsContext = sws_getContext(video_dec_ctx->width, video_dec_ctx->height,  mp4PixFmt,
                                              tmpframe->width, tmpframe->height,  yuv_pixfmt, SWS_BILINEAR,NULL,NULL,NULL);
 
-
     /* initialize packet, set data to NULL, let the demuxer fill it */
     av_init_packet(&pkt);
     pkt.data = NULL;
     pkt.size = 0;
-
+    qDebug()<<"----------------------2";
     /* read frames from the file */
     while (1)
     {
